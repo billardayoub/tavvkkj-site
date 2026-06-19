@@ -1,23 +1,810 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Bienvenue sur tavvkkj.xyz</title>
+  <meta charset="UTF-8" />
+  <title>Subway Runner – tavvkkj.xyz</title>
   <style>
-    body { 
-      font-family: Arial; 
-      background: #111; 
-      color: #fff; 
-      text-align: center; 
-      padding-top: 100px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    h1 { color: #4CAF50; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #05070b;
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #game-container {
+      width: 900px;
+      height: 520px;
+      background: radial-gradient(circle at top, #1b2335, #05070b);
+      border-radius: 18px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Écran de menu */
+    #menu-screen, #map-screen, #skin-screen, #game-screen {
+      position: absolute;
+      inset: 0;
+      padding: 24px;
+      display: none;
+    }
+
+    .screen-visible {
+      display: block;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 18px;
+      margin: 6px 0;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ffb347, #ff6b6b);
+      color: #111;
+      box-shadow: 0 0 14px rgba(255, 140, 80, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #f5f5f5;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: none;
+    }
+
+    .menu-buttons {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      max-width: 220px;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+
+    .row {
+      display: flex;
+      gap: 24px;
+      height: 100%;
+    }
+
+    .col {
+      flex: 1;
+    }
+
+    .card {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 16px;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      height: 100%;
+    }
+
+    .preview-box {
+      background: radial-gradient(circle at top, #2b3b5c, #05070b);
+      border-radius: 14px;
+      height: 260px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .lane {
+      position: absolute;
+      bottom: 0;
+      width: 30%;
+      height: 100%;
+      border-left: 1px dashed rgba(255, 255, 255, 0.08);
+      border-right: 1px dashed rgba(255, 255, 255, 0.08);
+      opacity: 0.7;
+    }
+
+    .lane:nth-child(1) { left: 5%; }
+    .lane:nth-child(2) { left: 35%; }
+    .lane:nth-child(3) { left: 65%; }
+
+    .runner-preview {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 70px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #f5f5f5, #c7c7c7);
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: hidden;
+    }
+
+    .runner-head {
+      width: 70%;
+      height: 26px;
+      background: #f0d0b0;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      margin-top: 0;
+    }
+
+    .runner-body {
+      width: 100%;
+      flex: 1;
+      background: linear-gradient(135deg, #3b82f6, #1e293b);
+    }
+
+    .runner-shadow {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 55px;
+      height: 10px;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.7), transparent);
+      opacity: 0.7;
+    }
+
+    .info-line {
+      font-size: 12px;
+      opacity: 0.85;
+      margin-bottom: 4px;
+    }
+
+    .info-label {
+      opacity: 0.6;
+      font-size: 11px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.06);
+      margin-right: 4px;
+    }
+
+    .list {
+      margin-top: 8px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .list-item {
+      margin-bottom: 4px;
+    }
+
+    /* Map & Skin selection */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .tile {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s, border 0.1s;
+      font-size: 12px;
+    }
+
+    .tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 14px rgba(0, 0, 0, 0.6);
+    }
+
+    .tile.selected {
+      border-color: #ffb347;
+      box-shadow: 0 0 16px rgba(255, 140, 80, 0.6);
+    }
+
+    .tile-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .tile-sub {
+      font-size: 11px;
+      opacity: 0.75;
+    }
+
+    /* Zone de jeu */
+    #game-screen {
+      padding: 0;
+      background: radial-gradient(circle at top, #1b2335, #05070b);
+    }
+
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      z-index: 10;
+    }
+
+    #hud span {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    #back-to-menu {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      z-index: 10;
+    }
+
+    #canvas-wrapper {
+      position: absolute;
+      inset: 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 11px;
+      opacity: 0.7;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
   </style>
 </head>
 <body>
-  <h1>Site en ligne ✔️</h1>
-  <p>Bienvenue sur tavvkkj.xyz — mini site GitHub Pages.</p>
+  <div id="game-container">
+    <!-- MENU PRINCIPAL -->
+    <div id="menu-screen" class="screen-visible">
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="tag">tavvkkj.xyz</div>
+            <div class="title">Subway Runner (inspiré)</div>
+            <div class="subtitle">
+              Version inspirée de Subway Surfers, avec maps, skins, chrono et score.  
+              Jouable directement sur ton domaine.
+            </div>
+
+            <div class="menu-buttons">
+              <button class="btn btn-primary" id="btn-play">▶ Jouer</button>
+              <button class="btn btn-secondary" id="btn-maps">🗺 Choisir la map</button>
+              <button class="btn btn-secondary" id="btn-skins">🧍 Choisir la skin</button>
+            </div>
+
+            <div style="margin-top: 18px; font-size: 12px; opacity: 0.8;">
+              <div class="info-line">
+                <span class="info-label">Maps actuelles :</span>
+                <span class="pill">New York réaliste</span>
+                <span class="pill">Tokyo réaliste</span>
+                <span class="pill">Paris réaliste</span>
+              </div>
+              <div class="info-line">
+                <span class="info-label">Skins :</span>
+                <span class="pill">Runner urbain</span>
+                <span class="pill">Ninja moderne</span>
+                <span class="pill">Skateur réaliste</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <div class="preview-box">
+              <div class="lane"></div>
+              <div class="lane"></div>
+              <div class="lane"></div>
+              <div class="runner-shadow"></div>
+              <div class="runner-preview">
+                <div class="runner-head"></div>
+                <div class="runner-body"></div>
+              </div>
+            </div>
+            <div class="list">
+              <div class="list-item">• Le personnage court automatiquement.</div>
+              <div class="list-item">• Utilise ← ↑ → pour changer de voie et sauter.</div>
+              <div class="list-item">• Chronomètre et score augmentent pendant la course.</div>
+              <div class="list-item">• Si tu touches un obstacle → fin de la run.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉCRAN MAPS -->
+    <div id="map-screen">
+      <div class="card">
+        <div class="title">Choisir la map</div>
+        <div class="subtitle">Maps inspirées des villes du vrai jeu, en version réaliste.</div>
+        <div class="grid" id="map-grid">
+          <div class="tile" data-map="newyork">
+            <div class="tile-title">New York</div>
+            <div class="tile-sub">Nuit, néons, métro urbain.</div>
+          </div>
+          <div class="tile" data-map="tokyo">
+            <div class="tile-title">Tokyo</div>
+            <div class="tile-sub">Lumières vives, panneaux japonais.</div>
+          </div>
+          <div class="tile" data-map="paris">
+            <div class="tile-title">Paris</div>
+            <div class="tile-sub">Tons dorés, ambiance européenne.</div>
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <button class="btn btn-secondary" id="btn-back-from-maps">← Retour</button>
+          <div style="font-size: 12px; opacity: 0.8;">Map actuelle : <span id="current-map-label">New York</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉCRAN SKINS -->
+    <div id="skin-screen">
+      <div class="card">
+        <div class="title">Choisir la skin</div>
+        <div class="subtitle">Skins réalistes inspirées de l’ambiance Subway Surfers.</div>
+        <div class="grid" id="skin-grid">
+          <div class="tile" data-skin="urban">
+            <div class="tile-title">Runner urbain</div>
+            <div class="tile-sub">Hoodie, jean, baskets.</div>
+          </div>
+          <div class="tile" data-skin="ninja">
+            <div class="tile-title">Ninja moderne</div>
+            <div class="tile-sub">Noir, masque, silhouette rapide.</div>
+          </div>
+          <div class="tile" data-skin="skater">
+            <div class="tile-title">Skateur réaliste</div>
+            <div class="tile-sub">Casquette, sweat, style street.</div>
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <button class="btn btn-secondary" id="btn-back-from-skins">← Retour</button>
+          <div style="font-size: 12px; opacity: 0.8;">Skin actuelle : <span id="current-skin-label">Runner urbain</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉCRAN DE JEU -->
+    <div id="game-screen">
+      <div id="hud">
+        <span>⏱ Temps : <span id="hud-time">0.0</span>s</span>
+        <span>⭐ Score : <span id="hud-score">0</span></span>
+        <span>🗺 Map : <span id="hud-map">New York</span> · 🧍 Skin : <span id="hud-skin">Runner urbain</span></span>
+      </div>
+      <button class="btn btn-secondary" id="back-to-menu">← Quitter la run</button>
+      <div id="hint">Flèches ← ↑ → pour bouger · Évite les obstacles</div>
+      <div id="canvas-wrapper">
+        <canvas id="game-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const menuScreen = document.getElementById('menu-screen');
+    const mapScreen = document.getElementById('map-screen');
+    const skinScreen = document.getElementById('skin-screen');
+    const gameScreen = document.getElementById('game-screen');
+
+    const btnPlay = document.getElementById('btn-play');
+    const btnMaps = document.getElementById('btn-maps');
+    const btnSkins = document.getElementById('btn-skins');
+    const btnBackFromMaps = document.getElementById('btn-back-from-maps');
+    const btnBackFromSkins = document.getElementById('btn-back-from-skins');
+    const btnBackToMenu = document.getElementById('back-to-menu');
+
+    const mapGrid = document.getElementById('map-grid');
+    const skinGrid = document.getElementById('skin-grid');
+    const currentMapLabel = document.getElementById('current-map-label');
+    const currentSkinLabel = document.getElementById('current-skin-label');
+
+    const hudTime = document.getElementById('hud-time');
+    const hudScore = document.getElementById('hud-score');
+    const hudMap = document.getElementById('hud-map');
+    const hudSkin = document.getElementById('hud-skin');
+
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let currentMap = 'newyork';
+    let currentSkin = 'urban';
+
+    let running = false;
+    let lastTimestamp = 0;
+    let elapsed = 0;
+    let score = 0;
+
+    let player = {
+      lane: 1,
+      y: 0,
+      vy: 0,
+      width: 40,
+      height: 70
+    };
+
+    let obstacles = [];
+    const lanesX = [0.2, 0.5, 0.8];
+
+    function showScreen(screen) {
+      [menuScreen, mapScreen, skinScreen, gameScreen].forEach(s => s.classList.remove('screen-visible'));
+      screen.classList.add('screen-visible');
+    }
+
+    btnMaps.addEventListener('click', () => showScreen(mapScreen));
+    btnSkins.addEventListener('click', () => showScreen(skinScreen));
+    btnBackFromMaps.addEventListener('click', () => showScreen(menuScreen));
+    btnBackFromSkins.addEventListener('click', () => showScreen(menuScreen));
+
+    mapGrid.addEventListener('click', (e) => {
+      const tile = e.target.closest('.tile');
+      if (!tile) return;
+      const map = tile.dataset.map;
+      currentMap = map;
+
+      document.querySelectorAll('#map-grid .tile').forEach(t => t.classList.remove('selected'));
+      tile.classList.add('selected');
+
+      if (map === 'newyork') currentMapLabel.textContent = 'New York';
+      if (map === 'tokyo') currentMapLabel.textContent = 'Tokyo';
+      if (map === 'paris') currentMapLabel.textContent = 'Paris';
+    });
+
+    skinGrid.addEventListener('click', (e) => {
+      const tile = e.target.closest('.tile');
+      if (!tile) return;
+      const skin = tile.dataset.skin;
+      currentSkin = skin;
+
+      document.querySelectorAll('#skin-grid .tile').forEach(t => t.classList.remove('selected'));
+      tile.classList.add('selected');
+
+      if (skin === 'urban') currentSkinLabel.textContent = 'Runner urbain';
+      if (skin === 'ninja') currentSkinLabel.textContent = 'Ninja moderne';
+      if (skin === 'skater') currentSkinLabel.textContent = 'Skateur réaliste';
+    });
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function startRun() {
+      running = true;
+      elapsed = 0;
+      score = 0;
+      lastTimestamp = performance.now();
+      obstacles = [];
+      player.lane = 1;
+      player.y = 0;
+      player.vy = 0;
+
+      if (currentMap === 'newyork') hudMap.textContent = 'New York';
+      if (currentMap === 'tokyo') hudMap.textContent = 'Tokyo';
+      if (currentMap === 'paris') hudMap.textContent = 'Paris';
+
+      if (currentSkin === 'urban') hudSkin.textContent = 'Runner urbain';
+      if (currentSkin === 'ninja') hudSkin.textContent = 'Ninja moderne';
+      if (currentSkin === 'skater') hudSkin.textContent = 'Skateur réaliste';
+
+      hudTime.textContent = '0.0';
+      hudScore.textContent = '0';
+
+      showScreen(gameScreen);
+      requestAnimationFrame(gameLoop);
+    }
+
+    btnPlay.addEventListener('click', startRun);
+
+    btnBackToMenu.addEventListener('click', () => {
+      running = false;
+      showScreen(menuScreen);
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (!running) return;
+      if (e.key === 'ArrowLeft') {
+        player.lane = Math.max(0, player.lane - 1);
+      } else if (e.key === 'ArrowRight') {
+        player.lane = Math.min(2, player.lane + 1);
+      } else if (e.key === 'ArrowUp') {
+        if (player.y === 0) {
+          player.vy = -18;
+        }
+      }
+    });
+
+    function spawnObstacle() {
+      const lane = Math.floor(Math.random() * 3);
+      obstacles.push({
+        lane,
+        y: -40,
+        width: 40,
+        height: 40
+      });
+    }
+
+    function drawBackground() {
+      const w = canvas.width;
+      const h = canvas.height;
+
+      let topColor, bottomColor;
+      if (currentMap === 'newyork') {
+        topColor = '#1f2937';
+        bottomColor = '#020617';
+      } else if (currentMap === 'tokyo') {
+        topColor = '#1e293b';
+        bottomColor = '#020617';
+      } else {
+        topColor = '#312e2b';
+        bottomColor = '#020617';
+      }
+
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, topColor);
+      grad.addColorStop(1, bottomColor);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 2;
+      const roadWidth = w * 0.7;
+      const roadX = (w - roadWidth) / 2;
+      ctx.beginPath();
+      ctx.moveTo(roadX, 0);
+      ctx.lineTo(roadX, h);
+      ctx.moveTo(roadX + roadWidth, 0);
+      ctx.lineTo(roadX + roadWidth, h);
+      ctx.stroke();
+
+      ctx.setLineDash([10, 14]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(roadX + roadWidth / 3, 0);
+      ctx.lineTo(roadX + roadWidth / 3, h);
+      ctx.moveTo(roadX + (2 * roadWidth) / 3, 0);
+      ctx.lineTo(roadX + (2 * roadWidth) / 3, h);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (currentMap === 'newyork') {
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
+        for (let i = 0; i < 6; i++) {
+          const bw = 40;
+          const bh = 80 + Math.random() * 60;
+          const bx = Math.random() * (roadX - bw);
+          const by = h - bh - Math.random() * 40;
+          ctx.fillRect(bx, by, bw, bh);
+          const bx2 = roadX + roadWidth + Math.random() * (w - roadX - roadWidth - bw);
+          ctx.fillRect(bx2, by, bw, bh);
+        }
+      } else if (currentMap === 'tokyo') {
+        for (let i = 0; i < 5; i++) {
+          const px = Math.random() * w;
+          const py = Math.random() * (h * 0.4);
+          const size = 3 + Math.random() * 3;
+          ctx.fillStyle = `hsla(${Math.random() * 360}, 80%, 60%, 0.9)`;
+          ctx.fillRect(px, py, size, size);
+        }
+      } else if (currentMap === 'paris') {
+        ctx.fillStyle = 'rgba(250, 204, 21, 0.4)';
+        ctx.beginPath();
+        ctx.arc(w * 0.15, h * 0.2, 40, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawPlayer() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const roadWidth = w * 0.7;
+      const roadX = (w - roadWidth) / 2;
+
+      const laneX = roadX + lanesX[player.lane] * roadWidth;
+
+      const baseY = h - 80;
+      const y = baseY + player.y;
+
+      let bodyGrad;
+      if (currentSkin === 'urban') {
+        bodyGrad = ctx.createLinearGradient(0, y, 0, y + player.height);
+        bodyGrad.addColorStop(0, '#3b82f6');
+        bodyGrad.addColorStop(1, '#111827');
+      } else if (currentSkin === 'ninja') {
+        bodyGrad = ctx.createLinearGradient(0, y, 0, y + player.height);
+        bodyGrad.addColorStop(0, '#020617');
+        bodyGrad.addColorStop(1, '#111827');
+      } else {
+        bodyGrad = ctx.createLinearGradient(0, y, 0, y + player.height);
+        bodyGrad.addColorStop(0, '#f97316');
+        bodyGrad.addColorStop(1, '#1f2937');
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.beginPath();
+      ctx.ellipse(laneX, y + player.height + 8, 26, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = bodyGrad;
+      ctx.fillRect(laneX - player.width / 2, y, player.width, player.height);
+
+      ctx.fillStyle = '#f5d0a0';
+      ctx.fillRect(laneX - player.width / 2 + 6, y - 22, player.width - 12, 22);
+
+      if (currentSkin === 'ninja') {
+        ctx.fillStyle = 'rgba(15,23,42,0.9)';
+        ctx.fillRect(laneX - player.width / 2 + 6, y - 22, player.width - 12, 14);
+      }
+    }
+
+    function drawObstacles() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const roadWidth = w * 0.7;
+      const roadX = (w - roadWidth) / 2;
+
+      obstacles.forEach(o => {
+        const laneX = roadX + lanesX[o.lane] * roadWidth;
+        const y = o.y;
+
+        let color = '#e11d48';
+        if (currentMap === 'tokyo') color = '#22c55e';
+        if (currentMap === 'paris') color = '#facc15';
+
+        ctx.fillStyle = color;
+        ctx.fillRect(laneX - o.width / 2, y, o.width, o.height);
+      });
+    }
+
+    function checkCollision() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const roadWidth = w * 0.7;
+      const roadX = (w - roadWidth) / 2;
+
+      const baseY = h - 80;
+      const playerX = roadX + lanesX[player.lane] * roadWidth;
+      const playerY = baseY + player.y;
+
+      for (const o of obstacles) {
+        const laneX = roadX + lanesX[o.lane] * roadWidth;
+        const ox = laneX - o.width / 2;
+        const oy = o.y;
+        const ow = o.width;
+        const oh = o.height;
+
+        const px = playerX - player.width / 2;
+        const py = playerY;
+        const pw = player.width;
+        const ph = player.height;
+
+        if (
+          px < ox + ow &&
+          px + pw > ox &&
+          py < oy + oh &&
+          py + ph > oy
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function gameLoop(timestamp) {
+      if (!running) return;
+      const dt = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      elapsed += dt;
+      score += dt * 10;
+
+      hudTime.textContent = elapsed.toFixed(1);
+      hudScore.textContent = Math.floor(score);
+
+      if (Math.random() < 0.02 + elapsed * 0.0005) {
+        spawnObstacle();
+      }
+
+      obstacles.forEach(o => {
+        o.y += 200 * dt + elapsed * 2;
+      });
+      obstacles = obstacles.filter(o => o.y < canvas.height + 60);
+
+      player.vy += 50 * dt;
+      player.y += player.vy * dt;
+      if (player.y > 0) {
+        player.y = 0;
+        player.vy = 0;
+      }
+
+      drawBackground();
+      drawObstacles();
+      drawPlayer();
+
+      if (checkCollision()) {
+        running = false;
+        setTimeout(() => {
+          alert('💥 Tu as touché un obstacle !\nTemps : ' + elapsed.toFixed(1) + 's\nScore : ' + Math.floor(score));
+          showScreen(menuScreen);
+        }, 50);
+        return;
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    document.querySelector('[data-map="newyork"]').classList.add('selected');
+    document.querySelector('[data-skin="urban"]').classList.add('selected');
+  </script>
 </body>
 </html>
-
-
